@@ -1,0 +1,47 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: ireceptor-dataloading
+  name: ireceptor-dataloading
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: ireceptor-dataloading
+  strategy:
+    resources: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: ireceptor-dataloading
+    spec:
+      containers:
+        - env:
+            - name: DB_DATABASE
+              value: ireceptor
+            - name: DB_HOST
+              value: ireceptor-database
+          image: ' '
+          name: ireceptor-dataloading
+          resources: {}
+      restartPolicy: Always
+  test: false
+  triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - ireceptor-dataloading
+        from:
+          kind: ImageStreamTag
+          name: ireceptor-dataloading:latest
+      type: ImageChange
+status:
+  availableReplicas: 0
+  latestVersion: 0
+  observedGeneration: 0
+  replicas: 0
+  unavailableReplicas: 0
+  updatedReplicas: 0

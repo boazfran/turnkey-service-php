@@ -1,0 +1,56 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: ireceptor-api
+  name: ireceptor-api
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: ireceptor-api
+  strategy:
+    resources: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: ireceptor-api
+    spec:
+      containers:
+        - env:
+            - name: DB_CELL_COLLECTION
+              value: cell
+            - name: DB_DATABASE
+              value: ireceptor
+            - name: DB_HOST
+              value: ireceptor-database
+            - name: DB_SAMPLES_COLLECTION
+              value: sample
+            - name: DB_SEQUENCES_COLLECTION
+              value: sequence
+          image: ' '
+          name: ireceptor-api
+          ports:
+            - containerPort: 8080
+            - containerPort: 8443
+          resources: {}
+      restartPolicy: Always
+  test: false
+  triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - ireceptor-api
+        from:
+          kind: ImageStreamTag
+          name: ireceptor-api:latest
+      type: ImageChange
+status:
+  availableReplicas: 0
+  latestVersion: 0
+  observedGeneration: 0
+  replicas: 0
+  unavailableReplicas: 0
+  updatedReplicas: 0

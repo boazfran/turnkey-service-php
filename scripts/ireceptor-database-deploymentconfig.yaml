@@ -1,0 +1,52 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: ireceptor-database
+  name: ireceptor-database
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: ireceptor-database
+  strategy:
+    resources: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: ireceptor-database
+    spec:
+      containers:
+        - env:
+            - name: MONGO_INITDB_DATABASE
+              value: ireceptor
+          image: ' '
+          name: ireceptor-database
+          resources: {}
+      volumeMounts:
+        - mountPath: /data/db
+          name: data-db
+      restartPolicy: Always
+  test: false
+  triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - ireceptor-database
+        from:
+          kind: ImageStreamTag
+          name: ireceptor-database:latest
+      type: ImageChange
+  volumes:
+    - name: data-db
+      persistentVolumeClaim:
+        claimName: data-db
+status:
+  availableReplicas: 0
+  latestVersion: 0
+  observedGeneration: 0
+  replicas: 0
+  unavailableReplicas: 0
+  updatedReplicas: 0
