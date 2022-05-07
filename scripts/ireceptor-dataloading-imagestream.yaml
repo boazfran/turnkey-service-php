@@ -3,7 +3,11 @@ kind: ImageStream
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: ireceptor-dataloading
+    app: ireceptor-dataloading
+    app.kubernetes.io/component: ireceptor-dataloading
+    app.kubernetes.io/instance: ireceptor-dataloading
+    app.kubernetes.io/name: ireceptor-dataloading
+    app.kubernetes.io/part-of: ireceptor-turnkey
   name: ireceptor-dataloading
 spec:
   lookupPolicy:

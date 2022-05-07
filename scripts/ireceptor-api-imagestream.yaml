@@ -3,7 +3,11 @@ kind: ImageStream
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: ireceptor-api
+    app: ireceptor-api
+    app.kubernetes.io/component: ireceptor-api
+    app.kubernetes.io/instance: ireceptor-api
+    app.kubernetes.io/name: ireceptor-api
+    app.kubernetes.io/part-of: ireceptor-turnkey
   name: ireceptor-api
 spec:
   lookupPolicy:

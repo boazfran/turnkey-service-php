@@ -3,7 +3,11 @@ kind: ImageStream
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: ireceptor-database
+    app: ireceptor-databse
+    app.kubernetes.io/component: ireceptor-databse
+    app.kubernetes.io/instance: ireceptor-databse
+    app.kubernetes.io/name: ireceptor-databse
+    app.kubernetes.io/part-of: ireceptor-turnkey
   name: ireceptor-database
 spec:
   lookupPolicy:
@@ -18,5 +22,3 @@ spec:
       name: latest
       referencePolicy:
         type: ""
-status:
-  dockerImageRepository: ""
