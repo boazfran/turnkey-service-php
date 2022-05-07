@@ -1,0 +1,146 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: ireceptor-turnkey-template
+objects:
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      labels:
+        app: ireceptor-turnkey
+      name: ireceptor-turnkey
+    spec:
+      ports:
+        - name: "80"
+          port: 80
+          targetPort: 8080
+        - name: "443"
+          port: 443
+          targetPort: 8443
+      selector:
+        app: ireceptor-turnkey
+    status:
+      loadBalancer: {}
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: data-db
+      namespace: frankeb-dev
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 1Gi
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      labels:
+        app: ireceptor-database
+        app.kubernetes.io/component: ireceptor-database
+        app.kubernetes.io/instance: ireceptor-database
+        app.kubernetes.io/name: ireceptor-database
+        app.kubernetes.io/part-of: turnkey-ireceptor
+      name: ireceptor-database
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: ireceptor-database
+      strategy:
+        resources: {}
+      template:
+        metadata:
+          labels:
+            app: ireceptor-database
+        spec:
+          volumes:
+            - name: data-db
+              persistentVolumeClaim:
+                claimName: data-db
+          containers:
+            - env:
+                - name: MONGO_INITDB_DATABASE
+                  value: ireceptor
+              image: boazfr/repository-mongodb:latest
+              name: ireceptor-database
+              resources: {}
+              volumeMounts:
+                - name: data-db
+                  mountPath: /data/db
+          restartPolicy: Always
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      labels:
+        app: ireceptor-dataloading
+        app.kubernetes.io/component: ireceptor-dataloading
+        app.kubernetes.io/instance: ireceptor-dataloading
+        app.kubernetes.io/name: ireceptor-dataloading
+        app.kubernetes.io/part-of: turnkey-ireceptor
+      name: ireceptor-dataloading
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: ireceptor-dataloading
+      strategy:
+        resources: {}
+      template:
+        metadata:
+          labels:
+            app: ireceptor-dataloading
+        spec:
+          containers:
+            - env:
+                - name: DB_DATABASE
+                  value: ireceptor
+                - name: DB_HOST
+                  value: ireceptor-database
+              image: boazfr/dataloading-mongo:latest
+              name: ireceptor-dataloading
+              resources: {}
+          restartPolicy: Always
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      labels:
+        app: ireceptor-api
+        app.kubernetes.io/component: ireceptor-api
+        app.kubernetes.io/instance: ireceptor-api
+        app.kubernetes.io/name: ireceptor-api
+        app.kubernetes.io/part-of: turnkey-ireceptor
+      name: ireceptor-api
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: ireceptor-api
+      strategy:
+        resources: {}
+      template:
+        metadata:
+          labels:
+            app: ireceptor-api
+        spec:
+          containers:
+            - env:
+                - name: DB_CELL_COLLECTION
+                  value: cell
+                - name: DB_DATABASE
+                  value: ireceptor
+                - name: DB_HOST
+                  value: ireceptor-database
+                - name: DB_SAMPLES_COLLECTION
+                  value: sample
+                - name: DB_SEQUENCES_COLLECTION
+                  value: sequence
+              image: boazfr/service-php-mongodb:latest
+              name: ireceptor-api
+              ports:
+                - containerPort: 8080
+                - containerPort: 8443
+              resources: {}
+    restartPolicy: Always
+
