@@ -1,0 +1,26 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ireceptor-dataloading
+    app.kubernetes.io/component: ireceptor-dataloading
+    app.kubernetes.io/instance: ireceptor-dataloading
+    app.kubernetes.io/name: ireceptor-dataloading
+    app.kubernetes.io/part-of: ireceptor-turnkey
+  name: ireceptor-dataloading
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: boazfr/dataloading-mongo:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
+status:
+  dockerImageRepository: ""

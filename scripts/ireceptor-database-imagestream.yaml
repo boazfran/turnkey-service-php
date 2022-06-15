@@ -1,0 +1,24 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ireceptor-databse
+    app.kubernetes.io/component: ireceptor-databse
+    app.kubernetes.io/instance: ireceptor-databse
+    app.kubernetes.io/name: ireceptor-databse
+    app.kubernetes.io/part-of: ireceptor-turnkey
+  name: ireceptor-database
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: boazfr/repository-mongodb:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""

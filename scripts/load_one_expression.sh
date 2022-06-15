@@ -1,16 +1,15 @@
 #!/bin/sh
 
 SCRIPT_DIR=`dirname "$0"`
-DATALODING_POD=`oc get pod | grep ireceptor-dataloading | awk '{print $1}'`
 
-REARRANGEMENT_TYPE="$1"
+GEX_TYPE="$1"
 
 FILE_ABSOLUTE_PATH=`realpath "$2"`
 FILE_FOLDER=`dirname "$FILE_ABSOLUTE_PATH"`
 FILE_NAME=`basename "$FILE_ABSOLUTE_PATH"`
 
-# copy the content of the file folder to the scratch directory on the pod
-oc rsync ${FILE_FOLDER} ${DATALODING_POD}:/scratch
+# make available to docker-compose.yml
+export FILE_FOLDER
 
 # create log file
 LOG_FOLDER=${SCRIPT_DIR}/../log
@@ -28,16 +27,21 @@ echo "Starting at: $TIME1"
 # "ireceptor-dataloading" is the service name defined in docker-compose.yml 
 # sh -c '...' is the command executed inside the container
 # $DB_HOST and $DB_DATABASE are defined in docker-compose.yml and will be substituted only when the python command is executed, INSIDE the container
-#oc set env pod/${DATALODING_POD} --overwrite FILE_NAME="$FILE_NAME" FILE_FOLDER="$FILE_FOLDER" REARRANGEMENT_TYPE="$REARRANGEMENT_TYPE"
-oc exec ${DATALODING_POD} -- \
-	sh -c 'python /app/dataload/dataloader.py -v \
-		--mapfile=/app/config/AIRR-iReceptorMapping.txt \
-		--host=$DB_HOST \
-		--database=$DB_DATABASE \
-		--repertoire_collection sample \
-		--rearrangement_collection sequence \
-		--$REARRANGEMENT_TYPE \
-		-f /scratch/$FILE_NAME' \
+sudo -E docker-compose --file ${SCRIPT_DIR}/docker-compose.yml --project-name turnkey-service run --rm \
+			-e FILE_NAME="$FILE_NAME" \
+			-e FILE_FOLDER="$FILE_FOLDER" \
+			-e GEX_TYPE="$GEX_TYPE" \
+			ireceptor-dataloading \
+				sh -c 'python /app/dataload/dataloader.py -v \
+					--mapfile=/app/config/AIRR-iReceptorMapping.txt \
+					--host=$DB_HOST \
+					--database=$DB_DATABASE \
+					--repertoire_collection sample \
+					--rearrangement_collection sequence \
+					--cell_collection cell \
+					--expression_collection expression \
+					--$GEX_TYPE \
+					-f /scratch/$FILE_NAME' \
  	2>&1 | tee $LOG_FILE
 
 TIME2=`date +%Y-%m-%d_%H-%M-%S`
